@@ -33,7 +33,10 @@ enum ENUM_STG_OSCILLATOR_OVERLAY_TYPE {
 
 // User input params.
 INPUT_GROUP("Oscillator Overlay strategy: main strategy params");
-INPUT ENUM_STG_OSCILLATOR_OVERLAY_TYPE Oscillator_Overlay_Type = STG_OSCILLATOR_OVERLAY_TYPE_CCI;  // Oscillator type
+INPUT ENUM_STG_OSCILLATOR_OVERLAY_TYPE Oscillator_Overlay_Type_Base =
+    STG_OSCILLATOR_OVERLAY_TYPE_CCI;  // Oscillator base
+INPUT ENUM_STG_OSCILLATOR_OVERLAY_TYPE Oscillator_Overlay_Type_Overlayed =
+    STG_OSCILLATOR_OVERLAY_TYPE_CCI;  // Oscillator overlayed
 INPUT_GROUP("Oscillator Overlay strategy: strategy params");
 INPUT float Oscillator_Overlay_LotSize = 0;                // Lot size
 INPUT int Oscillator_Overlay_SignalOpenMethod = 6;         // Signal open method
@@ -209,7 +212,7 @@ class Stg_Oscillator_Overlay : public Strategy {
    */
   bool IsValidEntry(IndicatorBase *_indi, int _shift = 0) {
     bool _result = true;
-    switch (Oscillator_Overlay_Type) {
+    switch (::Oscillator_Overlay_Type_Base) {
       case STG_OSCILLATOR_OVERLAY_TYPE_AC:
         _result &= dynamic_cast<Indi_AC *>(_indi).GetFlag(INDI_ENTRY_FLAG_IS_VALID, _shift) &&
                    dynamic_cast<Indi_AC *>(_indi).GetFlag(INDI_ENTRY_FLAG_IS_VALID, _shift + 1);
@@ -317,13 +320,21 @@ class Stg_Oscillator_Overlay : public Strategy {
    */
   void OnInit() {
     // Initialize indicators.
-    switch (::Oscillator_Overlay_Type) {
+    SetIndicatorByType(::Oscillator_Overlay_Type_Base, ::Oscillator_Overlay_Type_Base);
+    SetIndicatorByType(::Oscillator_Overlay_Type_Overlayed, ::Oscillator_Overlay_Type_Base + 1);
+  }
+
+  /**
+   * Sets indicator by type.
+   */
+  void SetIndicatorByType(ENUM_STG_OSCILLATOR_OVERLAY_TYPE _type, int _index) {
+    switch (_type) {
       case STG_OSCILLATOR_OVERLAY_TYPE_AC:  // AC
       {
         IndiACParams _indi_params(::Oscillator_Overlay_Indi_AC_Shift);
         _indi_params.SetDataSourceType(Oscillator_Overlay_Indi_AC_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_AC(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_AC(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_AD:  // AD
@@ -331,7 +342,7 @@ class Stg_Oscillator_Overlay : public Strategy {
         IndiADParams _indi_params(::Oscillator_Overlay_Indi_AD_Shift);
         _indi_params.SetDataSourceType(Oscillator_Overlay_Indi_AD_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_AD(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_AD(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_AO:  // AO
@@ -339,7 +350,7 @@ class Stg_Oscillator_Overlay : public Strategy {
         IndiAOParams _indi_params(::Oscillator_Overlay_Indi_Awesome_Shift);
         _indi_params.SetDataSourceType(Oscillator_Overlay_Indi_Awesome_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_AO(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_AO(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_ATR:  // ATR
@@ -347,7 +358,7 @@ class Stg_Oscillator_Overlay : public Strategy {
         IndiATRParams _indi_params(::Oscillator_Overlay_Indi_ATR_Period, ::Oscillator_Overlay_Indi_ATR_Shift);
         _indi_params.SetDataSourceType(Oscillator_Overlay_Indi_ATR_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_ATR(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_ATR(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_BEARS:  // Bears
@@ -357,7 +368,7 @@ class Stg_Oscillator_Overlay : public Strategy {
                                           ::Oscillator_Overlay_Indi_BearsPower_Shift);
         _indi_params.SetDataSourceType(Oscillator_Overlay_Indi_BearsPower_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_BearsPower(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_BearsPower(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_BULLS:  // Bulls
@@ -367,7 +378,7 @@ class Stg_Oscillator_Overlay : public Strategy {
                                           ::Oscillator_Overlay_Indi_BullsPower_Shift);
         _indi_params.SetDataSourceType(Oscillator_Overlay_Indi_BullsPower_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_BullsPower(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_BullsPower(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_BWMFI:  // BWMFI
@@ -375,7 +386,7 @@ class Stg_Oscillator_Overlay : public Strategy {
         IndiBWIndiMFIParams _indi_params(::Oscillator_Overlay_Indi_BWMFI_Shift);
         _indi_params.SetDataSourceType(Oscillator_Overlay_Indi_BWMFI_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_BWMFI(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_BWMFI(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_CCI:  // CCI
@@ -384,7 +395,7 @@ class Stg_Oscillator_Overlay : public Strategy {
                                    ::Oscillator_Overlay_Indi_CCI_Shift);
         _indi_params.SetDataSourceType(Oscillator_Overlay_Indi_CCI_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_CCI(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_CCI(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_CHO:  // Chaikin (CHO)
@@ -394,7 +405,7 @@ class Stg_Oscillator_Overlay : public Strategy {
                                    ::Oscillator_Overlay_Indi_CHO_InpVolumeType, ::Oscillator_Overlay_Indi_CHO_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_CHO_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_CHO(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_CHO(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_CHV:  // Chaikin Volatility (CHV)
@@ -403,7 +414,7 @@ class Stg_Oscillator_Overlay : public Strategy {
                                    ::Oscillator_Overlay_Indi_CHV_Smooth_Method, ::Oscillator_Overlay_Indi_CHV_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_CHV_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_CHV(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_CHV(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_DEMARKER:  // DeMarker
@@ -412,7 +423,7 @@ class Stg_Oscillator_Overlay : public Strategy {
                                         ::Oscillator_Overlay_Indi_DeMarker_Shift);
         _indi_params.SetDataSourceType(Oscillator_Overlay_Indi_DeMarker_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_DeMarker(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_DeMarker(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_MFI:  // MFI
@@ -421,7 +432,7 @@ class Stg_Oscillator_Overlay : public Strategy {
                                    ::Oscillator_Overlay_Indi_MFI_Applied_Volume, ::Oscillator_Overlay_Indi_MFI_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_MFI_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_MFI(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_MFI(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_MOM:  // MOM
@@ -431,7 +442,7 @@ class Stg_Oscillator_Overlay : public Strategy {
                                         ::Oscillator_Overlay_Indi_Momentum_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_Momentum_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_Momentum(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_Momentum(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_OBV:  // OBV
@@ -439,7 +450,7 @@ class Stg_Oscillator_Overlay : public Strategy {
         IndiOBVParams _indi_params(::Oscillator_Overlay_Indi_OBV_Applied_Price, ::Oscillator_Overlay_Indi_OBV_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_OBV_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_OBV(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_OBV(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_PVT:  // PVT
@@ -448,7 +459,7 @@ class Stg_Oscillator_Overlay : public Strategy {
                                                 ::Oscillator_Overlay_Indi_PVT_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_PVT_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_PriceVolumeTrend(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_PriceVolumeTrend(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_ROC:  // ROC
@@ -458,7 +469,7 @@ class Stg_Oscillator_Overlay : public Strategy {
                                             ::Oscillator_Overlay_Indi_ROC_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_ROC_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_RateOfChange(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_RateOfChange(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_RSI:  // RSI
@@ -467,7 +478,7 @@ class Stg_Oscillator_Overlay : public Strategy {
                                    ::Oscillator_Overlay_Indi_RSI_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_RSI_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_RSI(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_RSI(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_STDDEV:  // StdDev
@@ -478,7 +489,7 @@ class Stg_Oscillator_Overlay : public Strategy {
             ::Oscillator_Overlay_Indi_StdDev_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_StdDev_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_StdDev(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_StdDev(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_STOCH:  // Stochastic
@@ -489,7 +500,7 @@ class Stg_Oscillator_Overlay : public Strategy {
             ::Oscillator_Overlay_Indi_Stochastic_Price_Field, ::Oscillator_Overlay_Indi_Stochastic_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_Stochastic_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_Stochastic(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_Stochastic(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_TRIX:  // TRIX
@@ -498,7 +509,7 @@ class Stg_Oscillator_Overlay : public Strategy {
                                     ::Oscillator_Overlay_Indi_TRIX_Applied_Price, ::Oscillator_Overlay_Indi_TRIX_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_TRIX_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_TRIX(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_TRIX(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_UO:  // UO
@@ -510,7 +521,7 @@ class Stg_Oscillator_Overlay : public Strategy {
             ::Oscillator_Overlay_Indi_UO_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_UO_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_UltimateOscillator(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_UltimateOscillator(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_WAD:  // Williams' AD
@@ -518,7 +529,7 @@ class Stg_Oscillator_Overlay : public Strategy {
         IndiWilliamsADParams _indi_params(::Oscillator_Overlay_Indi_WAD_Shift);
         _indi_params.SetDataSourceType(Oscillator_Overlay_Indi_WAD_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_WilliamsAD(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_WilliamsAD(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_WPR:  // WPR
@@ -526,7 +537,7 @@ class Stg_Oscillator_Overlay : public Strategy {
         IndiWPRParams _indi_params(::Oscillator_Overlay_Indi_WPR_Period, ::Oscillator_Overlay_Indi_WPR_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_WPR_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_WPR(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_WPR(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_VOL:  // Volumes
@@ -535,7 +546,7 @@ class Stg_Oscillator_Overlay : public Strategy {
                                        ::Oscillator_Overlay_Indi_VOL_Shift);
         _indi_params.SetDataSourceType(::Oscillator_Overlay_Indi_VOL_SourceType);
         _indi_params.SetTf(Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF));
-        SetIndicator(new Indi_Volumes(_indi_params), ::Oscillator_Overlay_Type);
+        SetIndicator(new Indi_Volumes(_indi_params), _type);
         break;
       }
       case STG_OSCILLATOR_OVERLAY_TYPE_0_NONE:  // (None)
@@ -548,9 +559,9 @@ class Stg_Oscillator_Overlay : public Strategy {
    * Check strategy's opening signal.
    */
   bool SignalOpen(ENUM_ORDER_TYPE _cmd, int _method, float _level = 0.0f, int _shift = 0) {
-    IndicatorBase *_indi = GetIndicator(::Oscillator_Overlay_Type);
+    IndicatorBase *_indi = GetIndicator(::Oscillator_Overlay_Type_Base);
     // uint _ishift = _indi.GetShift();
-    bool _result = Oscillator_Overlay_Type != STG_OSCILLATOR_OVERLAY_TYPE_0_NONE && IsValidEntry(_indi, _shift);
+    bool _result = ::Oscillator_Overlay_Type_Base != STG_OSCILLATOR_OVERLAY_TYPE_0_NONE && IsValidEntry(_indi, _shift);
     if (!_result) {
       // Returns false when indicator data is not valid.
       return false;
