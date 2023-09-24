@@ -34,9 +34,9 @@ enum ENUM_STG_OSCILLATOR_OVERLAY_TYPE {
 // User input params.
 INPUT_GROUP("Oscillator Overlay strategy: main strategy params");
 INPUT ENUM_STG_OSCILLATOR_OVERLAY_TYPE Oscillator_Overlay_Type_Base =
-    STG_OSCILLATOR_OVERLAY_TYPE_CCI;  // Oscillator base
+    STG_OSCILLATOR_OVERLAY_TYPE_BULLS;  // Oscillator base
 INPUT ENUM_STG_OSCILLATOR_OVERLAY_TYPE Oscillator_Overlay_Type_Overlayed =
-    STG_OSCILLATOR_OVERLAY_TYPE_CCI;  // Oscillator overlayed
+    STG_OSCILLATOR_OVERLAY_TYPE_RSI;  // Oscillator overlayed
 INPUT_GROUP("Oscillator Overlay strategy: strategy params");
 INPUT float Oscillator_Overlay_LotSize = 0;                // Lot size
 INPUT int Oscillator_Overlay_SignalOpenMethod = 6;         // Signal open method
