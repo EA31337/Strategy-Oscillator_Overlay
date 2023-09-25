@@ -39,12 +39,12 @@ INPUT ENUM_STG_OSCILLATOR_OVERLAY_TYPE Oscillator_Overlay_Type_Overlayed =
     STG_OSCILLATOR_OVERLAY_TYPE_RSI;  // Oscillator overlayed
 INPUT_GROUP("Oscillator Overlay strategy: strategy params");
 INPUT float Oscillator_Overlay_LotSize = 0;                // Lot size
-INPUT int Oscillator_Overlay_SignalOpenMethod = 6;         // Signal open method
+INPUT int Oscillator_Overlay_SignalOpenMethod = 4;         // Signal open method
 INPUT float Oscillator_Overlay_SignalOpenLevel = 0;        // Signal open level
 INPUT int Oscillator_Overlay_SignalOpenFilterMethod = 32;  // Signal open filter method
 INPUT int Oscillator_Overlay_SignalOpenFilterTime = 3;     // Signal open filter time (0-31)
 INPUT int Oscillator_Overlay_SignalOpenBoostMethod = 0;    // Signal open boost method
-INPUT int Oscillator_Overlay_SignalCloseMethod = 0;        // Signal close method
+INPUT int Oscillator_Overlay_SignalCloseMethod = 4;        // Signal close method
 INPUT int Oscillator_Overlay_SignalCloseFilter = 32;       // Signal close filter (-127-127)
 INPUT float Oscillator_Overlay_SignalCloseLevel = 0;       // Signal close level
 INPUT int Oscillator_Overlay_PriceStopMethod = 0;          // Price limit method
